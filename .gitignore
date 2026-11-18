@@ -60,3 +60,5 @@ sort*.txt
 *_frames/
 *.mp4
 __pycache__/
+*.wav
+*_title.png

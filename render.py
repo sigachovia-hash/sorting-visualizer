@@ -5,11 +5,11 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 
 NAMES = {
-    "sort1": "Bubble sort",
-    "sort2": "Shaker sort",
-    "sort3": "Merge sort",
-    "sort4": "Insertion sort",
-    "sort5": "Shell sort",
+    "sort1": ("Bubble sort", "O(n^2)"),
+    "sort2": ("Shaker sort", "O(n^2)"),
+    "sort3": ("Merge sort", "O(n log n)"),
+    "sort4": ("Insertion sort", "O(n^2)"),
+    "sort5": ("Shell sort", "about O(n^1.5)"),
 }
 
 WIDTH, HEIGHT = 1280, 720
@@ -17,6 +17,7 @@ BACKGROUND = (25, 25, 35)
 BAR = (100, 180, 255)
 CHANGED = (240, 90, 90)
 TEXT = (255, 255, 255)
+SUBTEXT = (150, 160, 180)
 
 
 def load_font(size):
@@ -36,13 +37,29 @@ def read_file(filename):
     return frames
 
 
+def draw_centered(d, y, text, font, fill):
+    left, top, right, bottom = d.textbbox((0, 0), text, font=font)
+    d.text(((WIDTH - (right - left)) / 2, y), text, font=font, fill=fill)
+
+
+def draw_title(path, title, complexity, n, steps):
+    img = Image.new("RGB", (WIDTH, HEIGHT), BACKGROUND)
+    d = ImageDraw.Draw(img)
+    draw_centered(d, 250, title, load_font(96), TEXT)
+    draw_centered(d, 390, f"{complexity}   |   n = {n}   |   {steps} steps", load_font(40), SUBTEXT)
+    img.save(path)
+
+
 def draw(filename, frames, font):
     short_name = os.path.splitext(os.path.basename(filename))[0]
-    folder = os.path.join(os.path.dirname(filename), short_name + "_frames")
+    base = os.path.dirname(filename)
+    folder = os.path.join(base, short_name + "_frames")
     shutil.rmtree(folder, ignore_errors=True)
     os.makedirs(folder)
 
-    title = NAMES.get(short_name, short_name)
+    title, complexity = NAMES.get(short_name, (short_name, ""))
+    draw_title(os.path.join(base, short_name + "_title.png"), title, complexity, len(frames[0]), len(frames) - 1)
+
     max_num = max(max(frame) for frame in frames) or 1
     bar_w = WIDTH / len(frames[0])
     top = 70
